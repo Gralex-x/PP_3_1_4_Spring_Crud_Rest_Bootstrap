@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: PP_3_1_4_Spring_Crud_Rest_Bootstrap
+    environment:
+      MYSQL_DATABASE: 'PP_3_1_4_Spring_Crud_Rest_Bootstrap'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - "3306:3306"
