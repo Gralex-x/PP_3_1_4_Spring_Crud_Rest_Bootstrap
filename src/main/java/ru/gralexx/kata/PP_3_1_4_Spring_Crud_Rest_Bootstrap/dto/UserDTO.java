@@ -18,11 +18,9 @@ public class UserDTO {
     @Min(value = 0, message = "Age should be greater than 0")
     private Integer age;
 
-    @NotBlank(message = "Password cannot be empty")
     @Size(min = 8, max = 32)
     private String password;
 
-    @NotBlank(message = "Password cannot be empty")
     @Size(min = 8, max = 32)
     private String confirmPassword;
 

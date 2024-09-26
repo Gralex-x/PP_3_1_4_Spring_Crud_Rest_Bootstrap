@@ -1,8 +1,6 @@
 package ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.dao.UserRepository;
@@ -17,12 +15,10 @@ import static io.micrometer.common.util.StringUtils.isBlank;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userDao, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userDao) {
         this.userRepository = userDao;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -46,7 +42,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void addUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -54,13 +49,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         existingUser.setAge(user.getAge());
         existingUser.setUsername(user.getUsername());
         String password = user.getPassword();
-        if (!isBlank(password)) {
-            existingUser.setPassword(passwordEncoder.encode(password));
+        if (password != null && !isBlank(password)) {
+            existingUser.setPassword(password);
         }
         existingUser.setRoles(user.getRoles());
         userRepository.save(existingUser);
