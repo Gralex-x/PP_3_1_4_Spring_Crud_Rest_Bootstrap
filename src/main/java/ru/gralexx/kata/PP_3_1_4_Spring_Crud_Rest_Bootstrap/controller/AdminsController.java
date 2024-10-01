@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.dto.UserDTO;
-import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.mapper.UserMapper;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.model.User;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.security.UserDetailsImpl;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.service.UserService;
@@ -26,61 +24,51 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/users")
 public class AdminsController {
 
     private final UserService userService;
-    private final UserMapper userMapper;
 
     @Autowired
-    public AdminsController(UserService userService, UserMapper userMapper) {
+    public AdminsController(UserService userService) {
         this.userService = userService;
-        this.userMapper = userMapper;
-
     }
 
     @GetMapping("")
-    public ResponseEntity<List<UserDTO>> users() {
-        return new ResponseEntity<>(
-                userService.getUsers().stream()
-                        .map(userMapper::mapToUserDTO)
-                        .toList(),
-                HttpStatus.OK);
+    public ResponseEntity<List<User>> users() {
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
     @GetMapping("/current")
-    public ResponseEntity<UserDTO> currentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return new ResponseEntity<>(userMapper.mapToUserDTO(userDetails.user()), HttpStatus.OK);
+    public ResponseEntity<User> currentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return new ResponseEntity<>(userDetails.user(), HttpStatus.OK);
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserDTO> user(@RequestParam Long id) {
-        return new ResponseEntity<>(userMapper.mapToUserDTO(userService.getUserById(id)), HttpStatus.OK);
+    public ResponseEntity<User> user(@RequestParam Long id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/new")
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid UserDTO userDto, BindingResult bindingResult) {
+    @PostMapping("/addNew")
+    public ResponseEntity<HttpStatus> create(@RequestBody @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + " - " + fieldError.getDefaultMessage())
                     .collect(Collectors.joining(";"));
             throw new UserNotCreatedException(errorMsg);
         }
-        userService.addUser(userMapper.mapToUser(userDto));
+        userService.addUser(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PatchMapping(value = "/update", params = "id")
-    public ResponseEntity<HttpStatus> update(@RequestParam("id") Long id, @RequestBody @Valid UserDTO userDto, BindingResult bindingResult) {
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + " - " + fieldError.getDefaultMessage())
                     .collect(Collectors.joining(";"));
             throw new UserNotUpdatedException(errorMsg);
         }
-
-        User user = userMapper.mapToUser(userDto);
-        user.setId(id);
         userService.updateUser(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }

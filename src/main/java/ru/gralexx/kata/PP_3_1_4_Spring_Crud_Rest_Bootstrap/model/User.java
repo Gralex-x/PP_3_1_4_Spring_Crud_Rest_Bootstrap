@@ -1,5 +1,6 @@
 package ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -40,13 +42,14 @@ public class User {
 
     @Column(name = "age", nullable = false)
     @Min(value = 0, message = "Age should be greater than 0")
+    @Max(value = 130, message = "Too big age")
     private Integer age;
 
     @Column(name = "password", nullable = false)
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))

@@ -10,7 +10,6 @@ import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.model.Role;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 
 @Service
@@ -42,6 +41,11 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(readOnly = true)
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
+    }
+
+    @Override
+    public Role getRoleById(Long id) {
+        return roleRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
 }
