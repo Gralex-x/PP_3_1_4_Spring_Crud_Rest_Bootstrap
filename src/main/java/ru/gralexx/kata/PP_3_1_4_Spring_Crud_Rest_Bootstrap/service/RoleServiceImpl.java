@@ -48,4 +48,9 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
+    @Transactional
+    public Collection<Role> findAll() {
+        return roleRepository.findAll();
+    }
+
 }

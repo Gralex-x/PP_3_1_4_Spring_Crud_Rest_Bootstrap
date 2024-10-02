@@ -9,10 +9,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.model.User;
 import ru.gralexx.kata.PP_3_1_4_Spring_Crud_Rest_Bootstrap.security.UserDetailsImpl;
@@ -44,9 +44,9 @@ public class AdminsController {
         return new ResponseEntity<>(userDetails.user(), HttpStatus.OK);
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<User> user(@RequestParam Long id) {
-        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    @GetMapping("/{username}")
+    public ResponseEntity<User> user(@PathVariable("username") String username) {
+        return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.OK);
     }
 
     @PostMapping("/addNew")
@@ -61,21 +61,22 @@ public class AdminsController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PatchMapping(value = "/update", params = "id")
+    @PatchMapping(value = "/{username}")
     public ResponseEntity<HttpStatus> update(@RequestBody @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + " - " + fieldError.getDefaultMessage())
                     .collect(Collectors.joining(";"));
+
             throw new UserNotUpdatedException(errorMsg);
         }
         userService.updateUser(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<HttpStatus> delete(@RequestParam("id") Long id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/{username}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("username") String username) {
+        userService.deleteUserByUsername(username);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

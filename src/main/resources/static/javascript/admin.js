@@ -5,37 +5,52 @@ $(document).ready(async function () {
     await updateUsersTable()
 
     $("#submitEditBtn").bind("click", async function() {
+        let password = $("#editPassword").val();
+
+        if (!password) {
+            alert("Необходимо ввести пароль!");
+            return;
+        }
+
         let patchedUser = {
             id: $("#editId").val(),
             username: $("#editUsername").val(),
-            password: $("#editPassword").val(),
+            password: password,
             age: $("#editAge").val(),
             roles: []
         }
+
         for (let option of $("#editRoles").children()) {
             if (option.selected) {
-                let patchedRoleId = option.value
+                let patchedRoleId = option.value;
                 await fetch("/roles/" + patchedRoleId)
                     .then(response => response.json())
                     .then(role => {
-                        patchedUser.roles.push(role)
-                    })
+                        patchedUser.roles.push(role);
+                    });
             }
         }
-        let patchedUsername = $("#editUsername").val()
+
+        let patchedUsername = $("#editUsername").val();
+
+        // Отправляем PATCH запрос
         await fetch("/users/" + patchedUsername, {
             method: "PATCH",
             body: JSON.stringify(patchedUser),
             headers: {
                 "Content-Type": "application/json"
             }
-        })
-        await updateUsersTable()
+        });
+
+        await updateUsersTable();
+
         if ($("#editUsername").val() === await utils.getAuthUsername()) {
-            await utils.updateUserInfo()
+            await utils.updateUserInfo();
         }
-        $("#editModal").modal("hide")
-    })
+
+        $("#editModal").modal("hide");
+    });
+
 
     $("#submitDeleteBtn").bind("click", async function() {
         let deletedUsername = $("#deleteUsername").val()
@@ -59,6 +74,7 @@ $(document).ready(async function () {
         }
         $("#newUsername").val("")
         $("#newPassword").val("")
+
         $("#newAge").val("")
         for (let option of $("#newRoles").children()) {
             if (option.selected) {
@@ -111,7 +127,7 @@ async function updateUsersTable() {
         let roles = ""
         for (let role of user.roles) {
 
-            roles += `${role.role.substring(5)} `
+            roles += `${role.name.substring(5)} `
         }
         tdRoles.text(roles)
         tr.append(tdRoles)
@@ -144,7 +160,6 @@ async function editFunc() {
     select.empty()
     $("#editId").val(patchedUser.id)
     $("#editUsername").val(patchedUser.username)
-    // $("#editPassword").val(patchedUser.password)
     $("#editAge").val(patchedUser.age)
     let roles = await fetch("/roles")
         .then(response => response.json())
@@ -154,7 +169,7 @@ async function editFunc() {
     for (let role of roles) {
         let option = $("<option/>")
         option.val(role.id)
-        option.text(role.role)
+        option.text(role.name)
         for (let userRole of patchedUser.roles) {
             if (role.id === userRole.id) {
                 option.attr("selected", true)
@@ -180,7 +195,7 @@ async function deleteFunc() {
     $("#deleteAge").val(deletedUser.age)
     for (let role of deletedUser.roles) {
         let option = $("<option/>")
-        option.text(role.role)
+        option.text(role.name)
         select.append(option)
     }
     $("#deleteModal").modal("show")

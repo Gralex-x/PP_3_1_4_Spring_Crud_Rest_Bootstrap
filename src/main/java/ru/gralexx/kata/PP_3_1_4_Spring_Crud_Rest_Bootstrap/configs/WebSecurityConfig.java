@@ -6,10 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -33,18 +32,23 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/users/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/roles/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/user").hasAnyRole("USER")
+                        .requestMatchers("/", "index").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .successHandler(successUserHandler)
                         .permitAll()
-                ).logout(LogoutConfigurer::permitAll)
+                )
+                .logout(LogoutConfigurer::permitAll)
                 .userDetailsService(userDetailsService);
         return http.build();
     }
+
 
 }

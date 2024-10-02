@@ -15,7 +15,7 @@ spring:
         hbm2ddl:
           auto: update
   mvc:
-    hiddenmethod:
+    hidden-method:
       filter:
         enabled: true
 server:

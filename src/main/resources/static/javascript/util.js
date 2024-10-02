@@ -22,7 +22,7 @@ export async function updateUserInfo() {
         $("#userAge").text(authUser.age)
         let rolesText = " with roles: "
         for (let role of authUser.roles) {
-            rolesText += `${role.role.substring(5)},  `
+            rolesText += `${role.name.substring(5)},  `
         }
         $("#userRolesNavbar").text(rolesText.substring(0, rolesText.length - 3))
         $("#userRoles").text(rolesText.substring(12, rolesText.length - 3))
